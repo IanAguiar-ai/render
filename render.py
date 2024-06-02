@@ -39,8 +39,8 @@ class Polygon:
     """
     Polygon, simpler 3D shape
     """
-    __slots__ = ("p1", "p2", "p3", "p1_p2", "p2_p3", "p1_p3", "position", "color", "normal_vector", "positions_screen", "screen")
-    def __init__(self, p1:(float, float, float), p2:(float, float, float), p3:(float, float, float), screen:Screen, color:(int, int, int) = (140, 140, 200)):
+    __slots__ = ("p1", "p2", "p3", "p1_p2", "p2_p3", "p1_p3", "position", "color", "normal_vector", "positions_screen", "screen", "reflection")
+    def __init__(self, p1:(float, float, float), p2:(float, float, float), p3:(float, float, float), screen:Screen, color:(int, int, int) = (10, 10, 250), reflection:float = 0.2):
         self.p1:(float, float, float) = p1 #Point in space
         self.p2:(float, float, float) = p2 #Point in space
         self.p3:(float, float, float) = p3 #Point in space
@@ -52,9 +52,10 @@ class Polygon:
         self.normal_vector:(float, float, float) = find_normal_vector(self) #Vector
         self.positions_screen:((float, float), (float, float), (float, float)) = transpose_on_screen(self, screen)
         self.screen:Screen = screen
+        self.reflection:float = reflection #[0, 1]
 
     def add_composition(self, light:Light):
-        self.color:(int, int, int) = light_in_polygon(self, light)
+        self.color:(int, int, int) = light_in_polygon(self, light, self.screen)
         #print(f"Color: {self.color}\n\n")
 
 def multyple_polygons(polygon:Polygon) -> list:
@@ -74,10 +75,10 @@ def multyple_polygons(polygon:Polygon) -> list:
     p2 = polygon.p2
     p3 = polygon.p3
 
-    return [Polygon(p1,     p1_p2,      p1_p3, screen = polygon.screen, color = polygon.color),
-            Polygon(p1_p2,  p2,         p2_p3, screen = polygon.screen, color = polygon.color),
-            Polygon(p1_p2,  p2_p3,      p3, screen = polygon.screen, color = polygon.color),
-            Polygon(p1_p3,  p1_p2,       p3, screen = polygon.screen, color = polygon.color)]
+    return [Polygon(p1,     p1_p2,      p1_p3, screen = polygon.screen, color = polygon.color, reflection = polygon.reflection),
+            Polygon(p1_p2,  p2,         p2_p3, screen = polygon.screen, color = polygon.color, reflection = polygon.reflection),
+            Polygon(p1_p2,  p2_p3,      p3, screen = polygon.screen, color = polygon.color, reflection = polygon.reflection),
+            Polygon(p1_p3,  p1_p2,       p3, screen = polygon.screen, color = polygon.color, reflection = polygon.reflection)]
 
 def multyple_fast(list_polygons:list, times:int = 1) -> list:
     """
@@ -120,7 +121,11 @@ def render(screen:Screen, polygons:list, light:list, steps:bool = True) -> None:
     pygame.display.set_caption("RENDER")
 
     polygons = reorganize(polygons, screen)
-    t:float = 0.5/len(polygons)
+    if type(steps) == float or type(steps) == int:
+        t:float = steps
+        steps:bool = True
+    else:
+        t:float = 0.5/len(polygons)
     for p in polygons:
         pygame.draw.polygon(pygm, p.color, p.positions_screen)
         if steps:

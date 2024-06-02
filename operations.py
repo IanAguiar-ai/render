@@ -61,7 +61,7 @@ def distance_two_points(obj_1:"obj", obj_2:"obj") -> float:
             (obj_1.position[1] - obj_2.position[1])**2 + \
             (obj_1.position[2] - obj_2.position[2])**2)**(1/2)
 
-def light_in_polygon(polygon:"Polygon", light:"Light") -> (int, int, int):
+def light_in_polygon(polygon:"Polygon", light:"Light", screen:"Screen") -> (int, int, int):
     """
     Performs the light operation on the object
     """
@@ -76,11 +76,20 @@ def light_in_polygon(polygon:"Polygon", light:"Light") -> (int, int, int):
                                                 polygon.color[2]/255]
 
     #Calculate exposition of polygon to light:
-    light_vector:(float, float, float) = normalized(vector(light.position, polygon.position))
+    light_vector:(float, float, float) = normalized(vector(polygon.position, light.position))
     exposition:float = max(0,
                            light_vector[0] * polygon.normal_vector[0] + \
                            light_vector[1] * polygon.normal_vector[1] + \
-                           light_vector[2] * polygon.normal_vector[2])
+                           light_vector[2] * polygon.normal_vector[2]) #Also the dot product
+
+    #Calculate reflection of light:
+    reflection_vector:(float, float, float) = [light_vector[0] - 2 * exposition * polygon.normal_vector[0],
+                                               light_vector[1] - 2 * exposition * polygon.normal_vector[1],
+                                               light_vector[2] - 2 * exposition * polygon.normal_vector[2]] #R_line
+    camera_vector:(float, float, float) = normalized(vector(screen.position, polygon.position)) #w_0
+    reflection:float = ((reflection_vector[0] * camera_vector[0])**2 + \
+                        (reflection_vector[1] * camera_vector[1])**2 + \
+                        (reflection_vector[2] * camera_vector[2])**2)**(1/2) #w*R
 
     #Calculate distance for intensity:
     distance:float = distance_two_points(polygon, light)
@@ -88,7 +97,12 @@ def light_in_polygon(polygon:"Polygon", light:"Light") -> (int, int, int):
 
     #print(f"lv: {light_vector} <- {polygon.normal_vector}")
     #print(f"Exposition: {exposition}")
+    #print(f"Reflection: {reflection}")
 
     #Calculate color:
-    new_color:[float, float, float] = [max(exposition, light.ambient) * intensity * polygon_normalized[i] * light_normalized[i] for i in range(3)]
-    return (int(new_color[0] * 255), int(new_color[1] * 255), int(new_color[2] * 255))
+    correct:int = lambda x: int(max(0, min(x*255, 255)))
+    new_color:[float, float, float] = [(max(exposition, light.ambient) * intensity * polygon_normalized[i] * light_normalized[i]) + \
+                                       (light_normalized[i]*reflection*polygon.reflection) for i in range(3)]
+    return (correct(new_color[0]),
+            correct(new_color[1]),
+            correct(new_color[2]))
