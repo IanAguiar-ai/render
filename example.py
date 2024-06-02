@@ -39,7 +39,7 @@ if __name__ == "__main__":
     pygm = pygame.display.set_mode((screen.width, screen.height))
     pygame.display.set_caption("RENDER")
     clock = pygame.time.Clock()
-    #render(pygm, screen, polygons, light, steps = True)
+    render(pygm, screen, polygons, light, steps = True)
     while True:
         for i in range(10, 500, 5):
             light = [Light([50, i, 1000], color = color_light, screen = screen, intensity = int_, ambient = amb, size = size)]
