@@ -7,7 +7,7 @@ Render with the following features:
 - Textures;
 """
 
-from operations import vector, center_polygon, vectorial_product, find_normal_vector, transpose_on_screen, light_in_polygon, distance_two_points
+from operations import vector, normalized, center_polygon, vectorial_product, find_normal_vector, transpose_on_screen, light_in_polygon, distance_two_points
 import pygame
 from time import sleep
 from random import random
@@ -29,9 +29,9 @@ class Light:
     Light with basic properties
     """
     __slots__ = ("position", "color", "intensity", "ambient")
-    def __init__(self, position:(float, float, float), color:(int, int, int), intensity:float = 10, ambient:float = 0.1):
-        self.position:(int, int, int) = position
-        self.color:(int, int, int) = color
+    def __init__(self, position:[float, float, float], color:[int, int, int], intensity:float = 10, ambient:float = 0.1):
+        self.position:[int, int, int] = position
+        self.color:[int, int, int] = color
         self.intensity:float = intensity
         self.ambient:float = ambient #ambient light [0, 1]
 
@@ -39,7 +39,7 @@ class Polygon:
     """
     Polygon, simpler 3D shape
     """
-    __slots__ = ("p1", "p2", "p3", "p1_p2", "p2_p3", "p1_p3", "position", "color", "normal_vector", "positions_screen", "screen", "reflection")
+    __slots__ = ("p1", "p2", "p3", "p1_p2", "p2_p3", "p1_p3", "position", "color", "normal_vector", "positions_screen", "screen", "reflection", "see")
     def __init__(self, p1:(float, float, float), p2:(float, float, float), p3:(float, float, float), screen:Screen, color:(int, int, int) = (10, 10, 250), reflection:float = 0.2):
         self.p1:(float, float, float) = p1 #Point in space
         self.p2:(float, float, float) = p2 #Point in space
@@ -56,10 +56,28 @@ class Polygon:
         self.positions_screen:((float, float), (float, float), (float, float)) = transpose_on_screen(self, screen)
         self.screen:Screen = screen
         self.reflection:float = reflection #[0, 1]
+        self.see:bool = True#self.see_in_screen()
 
     def add_composition(self, light:Light):
+        """
+        Compositions to polygon
+        """
         self.color:(int, int, int) = light_in_polygon(self, light, self.screen)
         #print(f"Color: {self.color}\n\n")
+
+    def see_in_screen(self):
+        """
+        If the camera sees the polygon
+        """
+        camera_vector:(float, float, float) = normalized(vector(self.screen.position, self.position))
+        exposition:float = camera_vector[0] * self.normal_vector[0] + \
+                           camera_vector[1] * self.normal_vector[1] + \
+                           camera_vector[2] * self.normal_vector[2]
+        print(exposition)
+        if exposition > 0:
+            return True
+        else:
+            return False
 
 def multyple_polygons(polygon:Polygon) -> list:
     """
@@ -113,16 +131,10 @@ def reorganize(polygons:list, screen:Screen) -> list:
     polygons.sort(key = lambda poly: poly.position[2], reverse = True)
     return polygons
 
-def render(screen:Screen, polygons:list, light:list, steps:bool = True) -> None:
+def render(pygm, screen:Screen, polygons:list, light:list, steps:bool = True) -> None:
     """
     Set up the scene given the polygons and lights
     """
-    global width, height
-    pygame.init()
-    
-    pygm = pygame.display.set_mode((screen.width, screen.height))
-    pygame.display.set_caption("RENDER")
-
     polygons = reorganize(polygons, screen)
     if type(steps) == float or type(steps) == int:
         t:float = steps
@@ -130,16 +142,17 @@ def render(screen:Screen, polygons:list, light:list, steps:bool = True) -> None:
     else:
         t:float = 0.5/len(polygons)
     for p in polygons:
-        pygame.draw.polygon(pygm, p.color, p.positions_screen)
-        if steps:
-            pygame.display.flip()
-            sleep(t)
-        for l in light:
-            p.add_composition(l)
+        if p.see:
+            pygame.draw.polygon(pygm, p.color, p.positions_screen)
             if steps:
+                pygame.display.flip()
                 sleep(t)
-        pygame.draw.polygon(pygm, p.color, p.positions_screen)
-        if steps:
-            pygame.display.flip()
-            sleep(t)
+            for l in light:
+                p.add_composition(l)
+                if steps:
+                    sleep(t)
+            pygame.draw.polygon(pygm, p.color, p.positions_screen)
+            if steps:
+                pygame.display.flip()
+                sleep(t)
     pygame.display.flip()
