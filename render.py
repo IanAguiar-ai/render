@@ -7,7 +7,7 @@ Render with the following features:
 - Textures;
 """
 
-from operations import vector, normalized, center_polygon, vectorial_product, find_normal_vector, transpose_on_screen, light_in_polygon, distance_two_points
+from operations import vector, normalized, center_polygon, vectorial_product, find_normal_vector, transpose_on_screen, transpose_light_on_screen, light_in_polygon, distance_two_points
 import pygame
 from time import sleep
 from random import random
@@ -28,19 +28,21 @@ class Light:
     """
     Light with basic properties
     """
-    __slots__ = ("position", "color", "intensity", "ambient")
-    def __init__(self, position:[float, float, float], color:[int, int, int], intensity:float = 10, ambient:float = 0.1):
+    __slots__ = ("position", "color", "intensity", "ambient", "size", "positions_screen")
+    def __init__(self, position:[float, float, float], color:[int, int, int], screen:Screen, intensity:float = 10, ambient:float = 0.1, size:int = 5):
         self.position:[int, int, int] = position
         self.color:[int, int, int] = color
         self.intensity:float = intensity
         self.ambient:float = ambient #ambient light [0, 1]
+        self.positions_screen:(float, float) = transpose_light_on_screen(self, screen)
+        self.size:float = 1/size
 
 class Polygon:
     """
     Polygon, simpler 3D shape
     """
-    __slots__ = ("p1", "p2", "p3", "p1_p2", "p2_p3", "p1_p3", "position", "color", "normal_vector", "positions_screen", "screen", "reflection", "see")
-    def __init__(self, p1:(float, float, float), p2:(float, float, float), p3:(float, float, float), screen:Screen, color:(int, int, int) = (10, 10, 250), reflection:float = 0.2):
+    __slots__ = ("p1", "p2", "p3", "p1_p2", "p2_p3", "p1_p3", "position", "color", "color_to_plot", "normal_vector", "positions_screen", "screen", "reflection", "see", "metalic", "rough")
+    def __init__(self, p1:(float, float, float), p2:(float, float, float), p3:(float, float, float), screen:Screen, color:(int, int, int) = (10, 10, 250), reflection:float = 0.2, metalic:float = 0.3, rough:float = 0.7):
         self.p1:(float, float, float) = p1 #Point in space
         self.p2:(float, float, float) = p2 #Point in space
         self.p3:(float, float, float) = p3 #Point in space
@@ -52,17 +54,20 @@ class Polygon:
             self.color:(int, int, int) = (int(random()*255), int(random()*255), int(random()*255))
         else:
             self.color:(int, int, int) = color
+        self.color_to_plot:(int, int, int) = self.color
         self.normal_vector:(float, float, float) = find_normal_vector(self) #Vector
         self.positions_screen:((float, float), (float, float), (float, float)) = transpose_on_screen(self, screen)
         self.screen:Screen = screen
         self.reflection:float = reflection #[0, 1]
         self.see:bool = True#self.see_in_screen()
+        self.metalic:float = metalic
+        self.rough:float = rough
 
     def add_composition(self, light:Light):
         """
         Compositions to polygon
         """
-        self.color:(int, int, int) = light_in_polygon(self, light, self.screen)
+        self.color_to_plot:(int, int, int) = light_in_polygon(self, light, self.screen)
         #print(f"Color: {self.color}\n\n")
 
     def see_in_screen(self):
@@ -96,10 +101,10 @@ def multyple_polygons(polygon:Polygon) -> list:
     p2 = polygon.p2
     p3 = polygon.p3
 
-    return [Polygon(p1,     p1_p2,      p1_p3, screen = polygon.screen, color = polygon.color, reflection = polygon.reflection),
-            Polygon(p1_p2,  p2,         p2_p3, screen = polygon.screen, color = polygon.color, reflection = polygon.reflection),
-            Polygon(p1_p2,  p2_p3,      p3, screen = polygon.screen, color = polygon.color, reflection = polygon.reflection),
-            Polygon(p1_p3,  p1_p2,       p3, screen = polygon.screen, color = polygon.color, reflection = polygon.reflection)]
+    return [Polygon(p1,     p1_p2,      p1_p3,  screen = polygon.screen, color = polygon.color, reflection = polygon.reflection, metalic = polygon.metalic, rough = polygon.rough),
+            Polygon(p1_p2,  p2,         p2_p3,  screen = polygon.screen, color = polygon.color, reflection = polygon.reflection, metalic = polygon.metalic, rough = polygon.rough),
+            Polygon(p1_p2,  p2_p3,      p3,     screen = polygon.screen, color = polygon.color, reflection = polygon.reflection, metalic = polygon.metalic, rough = polygon.rough),
+            Polygon(p1_p3,  p1_p2,      p3,     screen = polygon.screen, color = polygon.color, reflection = polygon.reflection, metalic = polygon.metalic, rough = polygon.rough)]
 
 def multyple_fast(list_polygons:list, times:int = 1) -> list:
     """
@@ -135,6 +140,7 @@ def render(pygm, screen:Screen, polygons:list, light:list, steps:bool = True) ->
     """
     Set up the scene given the polygons and lights
     """
+    pygm.fill((0,0,0))
     polygons = reorganize(polygons, screen)
     if type(steps) == float or type(steps) == int:
         t:float = steps
@@ -143,7 +149,7 @@ def render(pygm, screen:Screen, polygons:list, light:list, steps:bool = True) ->
         t:float = 0.5/len(polygons)
     for p in polygons:
         if p.see:
-            pygame.draw.polygon(pygm, p.color, p.positions_screen)
+            pygame.draw.polygon(pygm, p.color_to_plot, p.positions_screen)
             if steps:
                 pygame.display.flip()
                 sleep(t)
@@ -151,8 +157,10 @@ def render(pygm, screen:Screen, polygons:list, light:list, steps:bool = True) ->
                 p.add_composition(l)
                 if steps:
                     sleep(t)
-            pygame.draw.polygon(pygm, p.color, p.positions_screen)
+            pygame.draw.polygon(pygm, p.color_to_plot, p.positions_screen)
             if steps:
                 pygame.display.flip()
                 sleep(t)
+    for l in light:
+        pygame.draw.circle(pygm, l.color, l.positions_screen, radius = 10)
     pygame.display.flip()
