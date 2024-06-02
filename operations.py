@@ -83,13 +83,16 @@ def light_in_polygon(polygon:"Polygon", light:"Light", screen:"Screen") -> (int,
                            light_vector[2] * polygon.normal_vector[2]) #Also the dot product
 
     #Calculate reflection of light:
-    reflection_vector:(float, float, float) = [light_vector[0] - 2 * exposition * polygon.normal_vector[0],
-                                               light_vector[1] - 2 * exposition * polygon.normal_vector[1],
-                                               light_vector[2] - 2 * exposition * polygon.normal_vector[2]] #R_line
-    camera_vector:(float, float, float) = normalized(vector(screen.position, polygon.position)) #w_0
-    reflection:float = ((reflection_vector[0] * camera_vector[0])**2 + \
-                        (reflection_vector[1] * camera_vector[1])**2 + \
-                        (reflection_vector[2] * camera_vector[2])**2)**(1/2) #w*R
+    if exposition > 0:
+        reflection_vector:(float, float, float) = [light_vector[0] - 2 * exposition * polygon.normal_vector[0],
+                                                   light_vector[1] - 2 * exposition * polygon.normal_vector[1],
+                                                   light_vector[2] - 2 * exposition * polygon.normal_vector[2]] #R_line
+        camera_vector:(float, float, float) = normalized(vector(screen.position, polygon.position)) #w_0
+        reflection:float = ((reflection_vector[0] * camera_vector[0])**2 + \
+                            (reflection_vector[1] * camera_vector[1])**2 + \
+                            (reflection_vector[2] * camera_vector[2])**2)**(1/2) #w*R
+    else:
+        reflection:float = 0
 
     #Calculate distance for intensity:
     distance:float = distance_two_points(polygon, light)
@@ -101,8 +104,8 @@ def light_in_polygon(polygon:"Polygon", light:"Light", screen:"Screen") -> (int,
 
     #Calculate color:
     correct:int = lambda x: int(max(0, min(x*255, 255)))
-    new_color:[float, float, float] = [(max(exposition, light.ambient) * intensity * polygon_normalized[i] * light_normalized[i]) + \
-                                       (light_normalized[i]*reflection*polygon.reflection) for i in range(3)]
+    new_color:[float, float, float] = [max((max(exposition, light.ambient) * intensity * polygon_normalized[i] * light_normalized[i]),
+                                       (light_normalized[i]*reflection*polygon.reflection)) for i in range(3)]
     return (correct(new_color[0]),
             correct(new_color[1]),
             correct(new_color[2]))

@@ -48,7 +48,10 @@ class Polygon:
         self.p2_p3:(float, float, float) = vector(p2, p3) #Vector
         self.p1_p3:(float, float, float) = vector(p1, p3) #Vector
         self.position:(float, float, float) = center_polygon(self) #Center point of the polygon
-        self.color:(int, int, int) = color #(int(random()*255), int(random()*255), int(random()*255))
+        if color == None:
+            self.color:(int, int, int) = (int(random()*255), int(random()*255), int(random()*255))
+        else:
+            self.color:(int, int, int) = color
         self.normal_vector:(float, float, float) = find_normal_vector(self) #Vector
         self.positions_screen:((float, float), (float, float), (float, float)) = transpose_on_screen(self, screen)
         self.screen:Screen = screen
