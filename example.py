@@ -13,7 +13,7 @@ if __name__ == "__main__":
     m = 600
     metalic = .3
     rough = .8
-    dispersion_light = .6
+    dispersion_light = 2
     color = (10, 10, 250)
     stats_polygon = {"color":color,
                      "reflection":ref,
@@ -37,7 +37,7 @@ if __name__ == "__main__":
 
     #Triangle:
 ##    a = 1000
-##    b = 500
+##    b = 700
 ##    c = 900
 ##    d = 1100
 ##    t1 = (a, a, b)
@@ -49,7 +49,7 @@ if __name__ == "__main__":
 ##                     Polygon(t1, t3, t4, screen = screen, **stats_polygon),
 ##                     Polygon(t4, t2, t1, screen = screen, **stats_polygon)])
  
-    polygons = multyple_fast(polygons, times = 3)
+    polygons = multyple_fast(polygons, times = 7)
 
     #Light:
     color_light = (255, 150, 150)
@@ -91,6 +91,8 @@ if __name__ == "__main__":
   
         mouse_x, mouse_y = 0, 0
         z = 0
+        color_r, color_g, color_b = color_light
+        n_t = 1
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEMOTION:
@@ -104,8 +106,26 @@ if __name__ == "__main__":
             if keys[pygame.K_a]:
                 z = 0
 
+            if keys[pygame.K_u]:
+                color_r = min(max(0,color_r+1), 255)
+            if keys[pygame.K_j]:
+                color_r = min(max(0,color_r-1), 255)
+            if keys[pygame.K_i]:
+                color_g = min(max(0,color_g+1), 255)
+            if keys[pygame.K_k]:
+                color_g = min(max(0,color_g-1), 255)
+            if keys[pygame.K_o]:
+                color_b = min(max(0,color_b+1), 255)
+            if keys[pygame.K_l]:
+                color_b = min(max(0,color_b-1), 255)
+
+            if n_t % 70 == 0:
+                n_t = 1
+                print(f"Z:{z}\nR:{color_r}\nG:{color_g}\nB:{color_b}")
+            n_t += 1
+
             position_light = [mouse_x, mouse_y, z]
-            light = [Light(position_light, color=color_light, screen=screen, intensity=int_, ambient=amb, size=size)]
+            light = [Light(position_light, color = (color_r, color_g, color_b), screen=screen, intensity=int_, ambient=amb, size=size)]
             render(pygm, screen, polygons, light, steps=False)
             clock.tick(24)
             

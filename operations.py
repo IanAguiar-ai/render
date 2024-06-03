@@ -24,6 +24,14 @@ def vectorial_product(a:"Polygon") -> (float, float, float):
             (a.p1_p2[2] * a.p1_p3[0]) - (a.p1_p2[0] * a.p1_p3[2]),
             (a.p1_p2[0] * a.p1_p3[1]) - (a.p1_p2[1] * a.p1_p3[0]))
 
+def vectorial_product_vector(a:"Obj", b:"Obj") -> (float, float, float):
+    """
+    Find vectorial product
+    """
+    return ((a[1] * b[2]) - (a[2] * b[1]),
+            (a[2] * b[0]) - (a[0] * b[2]),
+            (a[0] * b[1]) - (a[1] * b[0]))
+
 def find_normal_vector(polygon:"Polygon") -> (float, float, float):
     """
     Find the normal vector
@@ -63,7 +71,7 @@ def transpose_light_on_screen(light:"Light", screen:"Screen") -> ((float, float)
 
     return project_point(light.position, screen)
 
-def normalized(vector: (float, float, float)) -> (float, float, float):
+def normalized(vector:(float, float, float)) -> (float, float, float):
     """
     Normalize a vector
     """
@@ -71,9 +79,20 @@ def normalized(vector: (float, float, float)) -> (float, float, float):
     return (vector[0]/magnitude, vector[1]/magnitude, vector[2]/magnitude)
 
 def distance_two_points(obj_1:"obj", obj_2:"obj") -> float:
+    """
+    Distance two objects
+    """
     return ((obj_1.position[0] - obj_2.position[0])**2 + \
             (obj_1.position[1] - obj_2.position[1])**2 + \
             (obj_1.position[2] - obj_2.position[2])**2)**(1/2)
+
+def distance_two_points_vector(obj_1:(float, float, float), obj_2:(float, float, float)) -> float:
+    """
+    Distance two points
+    """
+    return ((obj_1[0] - obj_2[0])**2 + \
+            (obj_1[1] - obj_2[1])**2 + \
+            (obj_1[2] - obj_2[2])**2)**(1/2)
 
 def light_in_polygon(polygon:"Polygon", light:"Light", screen:"Screen") -> (int, int, int):
     """
@@ -102,11 +121,15 @@ def light_in_polygon(polygon:"Polygon", light:"Light", screen:"Screen") -> (int,
     #Calculate reflection of light:
     reflection_vector:(float, float, float) = [light_vector[0] - 2 * exposition * polygon.normal_vector[0],
                                                light_vector[1] - 2 * exposition * polygon.normal_vector[1],
-                                               light_vector[2] - 2 * exposition * polygon.normal_vector[2]] #R_line
+                                               light_vector[2] - 2 * exposition * polygon.normal_vector[2]] #R_line, way 1 to calc
     camera_vector:(float, float, float) = normalized(vector(screen.position, polygon.position)) #w_0
     reflection:float = ((reflection_vector[0] * camera_vector[0])**2 + \
                         (reflection_vector[1] * camera_vector[1])**2 + \
-                        (reflection_vector[2] * camera_vector[2])**2)**(1/2) * intensity #w*R
+                        (reflection_vector[2] * camera_vector[2])**2)**(1/2) * intensity #w*R, way 1 to calc
+##    reflection_vector:(float, float, float) = vectorial_product_vector(camera_vector, light_vector) #Other way to calc
+##    reflection:float = ((reflection_vector[0] * polygon.normal_vector[0])**2 + \
+##                        (reflection_vector[1] * polygon.normal_vector[1])**2 + \
+##                        (reflection_vector[2] * polygon.normal_vector[2])**2)**(1/2) #Other way to calc
     reflection = reflection**polygon.dispersion_light * polygon.rough + exposition * polygon.metalic
 
 

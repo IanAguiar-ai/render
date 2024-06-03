@@ -7,7 +7,7 @@ Render with the following features:
 - Textures;
 """
 
-from operations import vector, normalized, center_polygon, vectorial_product, find_normal_vector, transpose_on_screen, transpose_light_on_screen, light_in_polygon, distance_two_points
+from operations import vector, normalized, center_polygon, vectorial_product, find_normal_vector, transpose_on_screen, transpose_light_on_screen, light_in_polygon, distance_two_points, distance_two_points_vector
 import pygame
 from time import sleep
 from random import random
@@ -84,18 +84,20 @@ class Polygon:
         exposition:float = camera_vector[0] * self.normal_vector[0] + \
                            camera_vector[1] * self.normal_vector[1] + \
                            camera_vector[2] * self.normal_vector[2]
-        if exposition > -.4:
+        if exposition > -.72:
             return True
         else:
             return False
 
-def multyple_polygons(polygon:Polygon) -> list:
+def multyple_polygons(polygon:Polygon, mode:int = 2) -> list:
     """
     Multyple the number of polygons
     """
-##    return [Polygon(polygon.p1, polygon.p2, polygon.position, screen = polygon.screen, color = polygon.color),
-##            Polygon(polygon.p1, polygon.position, polygon.p3, screen = polygon.screen, color = polygon.color),
-##            Polygon(polygon.position, polygon.p2, polygon.p3, screen = polygon.screen, color = polygon.color)]
+    if mode == 0:
+        return [Polygon(polygon.p1, polygon.p2, polygon.position, screen = polygon.screen, color = polygon.color),
+                Polygon(polygon.p1, polygon.position, polygon.p3, screen = polygon.screen, color = polygon.color),
+                Polygon(polygon.position, polygon.p2, polygon.p3, screen = polygon.screen, color = polygon.color)]
+    
     def mean(a:list, b:list) -> list:
         return [(a[i]+b[i])/2 for i in range(3)]
 
@@ -106,10 +108,26 @@ def multyple_polygons(polygon:Polygon) -> list:
     p2 = polygon.p2
     p3 = polygon.p3
 
-    return [Polygon(p1,     p1_p2,      p1_p3,  screen = polygon.screen, **polygon.parameters),
-            Polygon(p1_p2,  p2,         p2_p3,  screen = polygon.screen, **polygon.parameters),
-            Polygon(p1_p2,  p2_p3,      p3,     screen = polygon.screen, **polygon.parameters),
-            Polygon(p1_p3,  p1_p2,      p3,     screen = polygon.screen, **polygon.parameters)]
+    if mode == 1:
+        return [Polygon(p1,     p1_p2,      p1_p3,  screen = polygon.screen, **polygon.parameters),
+                Polygon(p1_p2,  p2,         p2_p3,  screen = polygon.screen, **polygon.parameters),
+                Polygon(p1_p2,  p2_p3,      p3,     screen = polygon.screen, **polygon.parameters),
+                Polygon(p1_p3,  p1_p2,      p3,     screen = polygon.screen, **polygon.parameters)]
+
+    if mode == 2:
+        d1 = distance_two_points_vector(p1, p2)
+        d2 = distance_two_points_vector(p2, p3)
+        d3 = distance_two_points_vector(p1, p3)
+
+        if d1 >= d2 and d1 >= d3:
+            return [Polygon(p1_p2, p2, p3, screen=polygon.screen, **polygon.parameters),
+                    Polygon(p1, p1_p2, p3, screen=polygon.screen, **polygon.parameters)]
+        elif d2 >= d1 and d2 >= d3:
+            return [Polygon(p1, p2, p2_p3, screen=polygon.screen, **polygon.parameters),
+                    Polygon(p1, p2_p3, p3, screen=polygon.screen, **polygon.parameters)]
+        else:
+            return [Polygon(p1, p2, p1_p3, screen=polygon.screen, **polygon.parameters),
+                    Polygon(p1_p3, p2, p3, screen=polygon.screen, **polygon.parameters)]
 
 def multyple_fast(list_polygons:list, times:int = 1) -> list:
     """
