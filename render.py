@@ -41,8 +41,8 @@ class Polygon:
     """
     Polygon, simpler 3D shape
     """
-    __slots__ = ("p1", "p2", "p3", "p1_p2", "p2_p3", "p1_p3", "position", "color", "color_to_plot", "normal_vector", "positions_screen", "screen", "reflection", "see", "metalic", "rough")
-    def __init__(self, p1:(float, float, float), p2:(float, float, float), p3:(float, float, float), screen:Screen, color:(int, int, int) = (10, 10, 250), reflection:float = 0.2, metalic:float = 0.3, rough:float = 0.7):
+    __slots__ = ("p1", "p2", "p3", "p1_p2", "p2_p3", "p1_p3", "position", "color", "color_to_plot", "normal_vector", "positions_screen", "screen", "reflection", "see", "metalic", "rough", "dispersion_light", "parameters")
+    def __init__(self, p1:(float, float, float), p2:(float, float, float), p3:(float, float, float), screen:Screen, color:(int, int, int) = (10, 10, 250), reflection:float = 0.2, metalic:float = 0.3, rough:float = 0.7, dispersion_light:float = 2):
         self.p1:(float, float, float) = p1 #Point in space
         self.p2:(float, float, float) = p2 #Point in space
         self.p3:(float, float, float) = p3 #Point in space
@@ -62,6 +62,12 @@ class Polygon:
         self.see:bool = True#self.see_in_screen()
         self.metalic:float = metalic
         self.rough:float = rough
+        self.dispersion_light:float = 1/dispersion_light
+        self.parameters:dict = {"color":color,
+                                "reflection":reflection,
+                                "metalic":metalic,
+                                "rough":rough,
+                                "dispersion_light":dispersion_light}
 
     def add_composition(self, light:Light):
         """
@@ -74,12 +80,11 @@ class Polygon:
         """
         If the camera sees the polygon
         """
-        camera_vector:(float, float, float) = normalized(vector(self.screen.position, self.position))
+        camera_vector:(float, float, float) = normalized(vector(self.position, self.screen.position))
         exposition:float = camera_vector[0] * self.normal_vector[0] + \
                            camera_vector[1] * self.normal_vector[1] + \
                            camera_vector[2] * self.normal_vector[2]
-        print(exposition)
-        if exposition > 0:
+        if exposition > -.4:
             return True
         else:
             return False
@@ -101,10 +106,10 @@ def multyple_polygons(polygon:Polygon) -> list:
     p2 = polygon.p2
     p3 = polygon.p3
 
-    return [Polygon(p1,     p1_p2,      p1_p3,  screen = polygon.screen, color = polygon.color, reflection = polygon.reflection, metalic = polygon.metalic, rough = polygon.rough),
-            Polygon(p1_p2,  p2,         p2_p3,  screen = polygon.screen, color = polygon.color, reflection = polygon.reflection, metalic = polygon.metalic, rough = polygon.rough),
-            Polygon(p1_p2,  p2_p3,      p3,     screen = polygon.screen, color = polygon.color, reflection = polygon.reflection, metalic = polygon.metalic, rough = polygon.rough),
-            Polygon(p1_p3,  p1_p2,      p3,     screen = polygon.screen, color = polygon.color, reflection = polygon.reflection, metalic = polygon.metalic, rough = polygon.rough)]
+    return [Polygon(p1,     p1_p2,      p1_p3,  screen = polygon.screen, **polygon.parameters),
+            Polygon(p1_p2,  p2,         p2_p3,  screen = polygon.screen, **polygon.parameters),
+            Polygon(p1_p2,  p2_p3,      p3,     screen = polygon.screen, **polygon.parameters),
+            Polygon(p1_p3,  p1_p2,      p3,     screen = polygon.screen, **polygon.parameters)]
 
 def multyple_fast(list_polygons:list, times:int = 1) -> list:
     """
@@ -162,5 +167,5 @@ def render(pygm, screen:Screen, polygons:list, light:list, steps:bool = True) ->
                 pygame.display.flip()
                 sleep(t)
     for l in light:
-        pygame.draw.circle(pygm, l.color, l.positions_screen, radius = 10)
+        pygame.draw.circle(pygm, l.color, l.positions_screen, radius = int(20/(max(l.position[2], 1))**(1/2) + 1))
     pygame.display.flip()

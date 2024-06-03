@@ -6,26 +6,48 @@ if __name__ == "__main__":
     screen = Screen((0, 0, 1000), width, height)
 
     #Polygons:
-    ref = .8
+    ref = 1
     amb = 0.15
     int_ = 1000
     n = 200
     m = 600
     metalic = .3
-    rough = .7
+    rough = .8
+    dispersion_light = .6
     color = (10, 10, 250)
-    polygons = [Polygon((n, n, m), (n, m, m), (m, n, m), screen = screen, reflection = ref, color = color, rough = rough, metalic = metalic), #f1
-                Polygon((m, n, m), (n, m, m), (m, m, m), screen = screen, reflection = ref, color = color, rough = rough, metalic = metalic), #f1
-                Polygon((m, n, n), (n, m, n), (n, n, n), screen = screen, reflection = ref, color = color, rough = rough, metalic = metalic), #f2
-                Polygon((m, m, n), (n, m, n), (m, n, n), screen = screen, reflection = ref, color = color, rough = rough, metalic = metalic), #f2
-                Polygon((m, n, n), (n, n, m), (m, n, m), screen = screen, reflection = ref, color = color, rough = rough, metalic = metalic), #f3
-                Polygon((n, n, n), (n, n, m), (m, n, n), screen = screen, reflection = ref, color = color, rough = rough, metalic = metalic), #f3
-                Polygon((m, m, n), (n, m, m), (m, m, m), screen = screen, reflection = ref, color = color, rough = rough, metalic = metalic), #f4
-                Polygon((n, m, n), (n, m, m), (m, m, n), screen = screen, reflection = ref, color = color, rough = rough, metalic = metalic), #f4
-                Polygon((n, m, n), (n, m, m), (n, n, n), screen = screen, reflection = ref, color = color, rough = rough, metalic = metalic), #f5
-                Polygon((n, n, n), (n, m, m), (n, n, m), screen = screen, reflection = ref, color = color, rough = rough, metalic = metalic), #f5
-                Polygon((m, m, n), (m, m, m), (m, n, n), screen = screen, reflection = ref, color = color, rough = rough, metalic = metalic), #f6
-                Polygon((m, n, n), (m, m, m), (m, n, m), screen = screen, reflection = ref, color = color, rough = rough, metalic = metalic)] #f6
+    stats_polygon = {"color":color,
+                     "reflection":ref,
+                     "metalic":metalic,
+                     "rough":rough,
+                     "dispersion_light":dispersion_light}
+
+    #Cube:
+    polygons = [Polygon((n, n, m), (n, m, m), (m, n, m), screen = screen, **stats_polygon), #f1
+                Polygon((m, n, m), (n, m, m), (m, m, m), screen = screen, **stats_polygon), #f1
+                Polygon((m, n, n), (n, m, n), (n, n, n), screen = screen, **stats_polygon), #f2
+                Polygon((m, m, n), (n, m, n), (m, n, n), screen = screen, **stats_polygon), #f2
+                Polygon((m, n, n), (n, n, m), (m, n, m), screen = screen, **stats_polygon), #f3
+                Polygon((n, n, n), (n, n, m), (m, n, n), screen = screen, **stats_polygon), #f3
+                Polygon((m, m, n), (n, m, m), (m, m, m), screen = screen, **stats_polygon), #f4
+                Polygon((n, m, n), (n, m, m), (m, m, n), screen = screen, **stats_polygon), #f4
+                Polygon((n, m, n), (n, m, m), (n, n, n), screen = screen, **stats_polygon), #f5
+                Polygon((n, n, n), (n, m, m), (n, n, m), screen = screen, **stats_polygon), #f5
+                Polygon((m, m, n), (m, m, m), (m, n, n), screen = screen, **stats_polygon), #f6
+                Polygon((m, n, n), (m, m, m), (m, n, m), screen = screen, **stats_polygon)] #f6
+
+    #Triangle:
+##    a = 1000
+##    b = 500
+##    c = 900
+##    d = 1100
+##    t1 = (a, a, b)
+##    t2 = (d, b, c)
+##    t3 = (b, a, c)
+##    t4 = (a, a, c)
+##    polygons.extend([Polygon(t3, t2, t1, screen = screen, **stats_polygon),
+##                     Polygon(t2, t3, t4, screen = screen, **stats_polygon),
+##                     Polygon(t1, t3, t4, screen = screen, **stats_polygon),
+##                     Polygon(t4, t2, t1, screen = screen, **stats_polygon)])
  
     polygons = multyple_fast(polygons, times = 3)
 
@@ -66,15 +88,25 @@ if __name__ == "__main__":
             render(pygm, screen, polygons, light, steps = False)
             clock.tick(24)
         print("f")
-        
+  
         mouse_x, mouse_y = 0, 0
+        z = 0
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEMOTION:
                     mouse_x, mouse_y = pygame.mouse.get_pos()
-            position_light = [mouse_x, mouse_y, 0]
-            light = [Light(position_light, color = color_light, screen = screen, intensity = int_, ambient = amb, size = size)]
-            render(pygm, screen, polygons, light, steps = False)
+
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_w]:
+                z += 1
+            if keys[pygame.K_s]:
+                z -= 1
+            if keys[pygame.K_a]:
+                z = 0
+
+            position_light = [mouse_x, mouse_y, z]
+            light = [Light(position_light, color=color_light, screen=screen, intensity=int_, ambient=amb, size=size)]
+            render(pygm, screen, polygons, light, steps=False)
             clock.tick(24)
             
     pygame.quit()
