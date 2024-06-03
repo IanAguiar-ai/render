@@ -1,9 +1,14 @@
 from render import *
+from math import cos, sin
+from random import random
 
 if __name__ == "__main__":
     #Screen:
     width, height = 1080, 720
     screen = Screen((0, 0, 1000), width, height)
+
+    roug = lambda x: max(0, sin(x*100)/1.5)
+    strange = lambda x: x**3
 
     #Polygons:
     ref = 1
@@ -12,14 +17,15 @@ if __name__ == "__main__":
     n = 200
     m = 600
     metalic = .3
-    rough = .8
+    rough = .7
     dispersion_light = 2
     color = (10, 10, 250)
     stats_polygon = {"color":color,
                      "reflection":ref,
                      "metalic":metalic,
                      "rough":rough,
-                     "dispersion_light":dispersion_light}
+                     "dispersion_light":dispersion_light,
+                     "texture":False}
 
     #Cube:
     polygons = [Polygon((n, n, m), (n, m, m), (m, n, m), screen = screen, **stats_polygon), #f1

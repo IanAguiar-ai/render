@@ -130,8 +130,9 @@ def light_in_polygon(polygon:"Polygon", light:"Light", screen:"Screen") -> (int,
 ##    reflection:float = ((reflection_vector[0] * polygon.normal_vector[0])**2 + \
 ##                        (reflection_vector[1] * polygon.normal_vector[1])**2 + \
 ##                        (reflection_vector[2] * polygon.normal_vector[2])**2)**(1/2) #Other way to calc
-    reflection = reflection**polygon.dispersion_light * polygon.rough + exposition * polygon.metalic
-
+    if polygon.texture != False:
+        reflection = polygon.texture(reflection)
+    reflection = reflection**polygon.dispersion_light * polygon.rough + exposition * polygon.metalic  
 
     #print(f"lv: {light_vector} <- {polygon.normal_vector}")
     #print(f"Exposition: {exposition}")

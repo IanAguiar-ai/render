@@ -41,8 +41,8 @@ class Polygon:
     """
     Polygon, simpler 3D shape
     """
-    __slots__ = ("p1", "p2", "p3", "p1_p2", "p2_p3", "p1_p3", "position", "color", "color_to_plot", "normal_vector", "positions_screen", "screen", "reflection", "see", "metalic", "rough", "dispersion_light", "parameters")
-    def __init__(self, p1:(float, float, float), p2:(float, float, float), p3:(float, float, float), screen:Screen, color:(int, int, int) = (10, 10, 250), reflection:float = 0.2, metalic:float = 0.3, rough:float = 0.7, dispersion_light:float = 2):
+    __slots__ = ("p1", "p2", "p3", "p1_p2", "p2_p3", "p1_p3", "position", "color", "color_to_plot", "normal_vector", "positions_screen", "screen", "reflection", "see", "metalic", "rough", "dispersion_light", "parameters", "texture")
+    def __init__(self, p1:(float, float, float), p2:(float, float, float), p3:(float, float, float), screen:Screen, color:(int, int, int) = (10, 10, 250), reflection:float = 0.2, metalic:float = 0.3, rough:float = 0.7, dispersion_light:float = 2, texture:"function" = False):
         self.p1:(float, float, float) = p1 #Point in space
         self.p2:(float, float, float) = p2 #Point in space
         self.p3:(float, float, float) = p3 #Point in space
@@ -63,11 +63,13 @@ class Polygon:
         self.metalic:float = metalic
         self.rough:float = rough
         self.dispersion_light:float = 1/dispersion_light
+        self.texture:"function" = texture
         self.parameters:dict = {"color":color,
                                 "reflection":reflection,
                                 "metalic":metalic,
                                 "rough":rough,
-                                "dispersion_light":dispersion_light}
+                                "dispersion_light":dispersion_light,
+                                "texture":texture}
 
     def add_composition(self, light:Light):
         """
