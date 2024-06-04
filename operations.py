@@ -32,6 +32,14 @@ def vectorial_product_vector(a:"Obj", b:"Obj") -> (float, float, float):
             (a[2] * b[0]) - (a[0] * b[2]),
             (a[0] * b[1]) - (a[1] * b[0]))
 
+def dot_product(vector_1:(float, float, float), vector_2:(float, float, float)) -> float:
+    """
+    Dot product
+    """
+    return ((vector_1[0] * vector_2[0])**2 + \
+            (vector_1[1] * vector_2[1])**2 + \
+            (vector_1[2] * vector_2[2])**2)**(1/2)
+
 def find_normal_vector(polygon:"Polygon") -> (float, float, float):
     """
     Find the normal vector
@@ -123,13 +131,10 @@ def light_in_polygon(polygon:"Polygon", light:"Light", screen:"Screen") -> (int,
                                                light_vector[1] - 2 * exposition * polygon.normal_vector[1],
                                                light_vector[2] - 2 * exposition * polygon.normal_vector[2]] #R_line, way 1 to calc
     camera_vector:(float, float, float) = normalized(vector(screen.position, polygon.position)) #w_0
-    reflection:float = ((reflection_vector[0] * camera_vector[0])**2 + \
-                        (reflection_vector[1] * camera_vector[1])**2 + \
-                        (reflection_vector[2] * camera_vector[2])**2)**(1/2) * intensity #w*R, way 1 to calc
+    reflection:float = dot_product(reflection_vector, camera_vector) * intensity #w*R, way 1 to calc
 ##    reflection_vector:(float, float, float) = vectorial_product_vector(camera_vector, light_vector) #Other way to calc
-##    reflection:float = ((reflection_vector[0] * polygon.normal_vector[0])**2 + \
-##                        (reflection_vector[1] * polygon.normal_vector[1])**2 + \
-##                        (reflection_vector[2] * polygon.normal_vector[2])**2)**(1/2) #Other way to calc
+##    reflection:float = dot_product(reflection_vector, polygon.normal_vector)
+    
     if polygon.texture != False:
         reflection = polygon.texture(reflection)
     reflection = reflection**polygon.dispersion_light * polygon.rough + exposition * polygon.metalic  
@@ -145,3 +150,5 @@ def light_in_polygon(polygon:"Polygon", light:"Light", screen:"Screen") -> (int,
     return (correct(new_color[0]),
             correct(new_color[1]),
             correct(new_color[2]))
+
+#Try export functions pre compiled
