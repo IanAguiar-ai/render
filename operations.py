@@ -24,7 +24,7 @@ def vectorial_product(a:"Polygon") -> (float, float, float):
             (a.p1_p2[2] * a.p1_p3[0]) - (a.p1_p2[0] * a.p1_p3[2]),
             (a.p1_p2[0] * a.p1_p3[1]) - (a.p1_p2[1] * a.p1_p3[0]))
 
-def vectorial_product_vector(a:"Obj", b:"Obj") -> (float, float, float):
+def vectorial_product_vector(a:(float, float, float), b:(float, float, float)) -> (float, float, float):
     """
     Find vectorial product
     """
