@@ -174,8 +174,8 @@ def render(pygm, screen:Screen, polygons:list, light:list, steps:bool = True) ->
         t:float = 0.5/len(polygons)
     for p in polygons:
         if p.see:
-            pygame.draw.polygon(pygm, p.color_to_plot, p.positions_screen)
-            if steps:
+            if steps != False:
+                pygame.draw.polygon(pygm, p.color_to_plot, p.positions_screen)
                 pygame.display.flip()
                 sleep(t)
             for l in light:
