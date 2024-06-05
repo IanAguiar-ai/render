@@ -7,7 +7,7 @@ Render with the following features:
 - Textures;
 """
 
-from operations import vector, normalized, center_polygon, vectorial_product, find_normal_vector, transpose_on_screen, transpose_light_on_screen, light_in_polygon, distance_two_points, distance_two_points_vector
+from operations import vector, normalized, center_polygon, vectorial_product, find_normal_vector, transpose_on_screen, transpose_light_on_screen, light_in_polygon, shadow_in_polygon, distance_two_points, distance_two_points_vector
 import pygame
 from time import sleep
 from random import random
@@ -24,52 +24,56 @@ class Screen:
         self.width:int = x
         self.height:int = y
 
-class Light:
+class Base:
+    """
+    Base class with common properties
+    """
+    __slots__ = ("p1", "p2", "p3", "p1_p2", "p2_p3", "p1_p3", "color", "color_to_plot", "positions_screen", "screen", "see")
+    def __init__(self, p1:(float, float, float), p2:(float, float, float), p3:(float, float, float), color:(int, int, int), screen:Screen):
+        self.p1:(float, float, float) = p1
+        self.p2:(float, float, float) = p2
+        self.p3:(float, float, float) = p3
+        self.p1_p2:(float, float, float) = vector(self.p1, self.p2) # Vector
+        self.p2_p3:(float, float, float) = vector(self.p2, self.p3) # Vector
+        self.p1_p3:(float, float, float) = vector(self.p1, self.p3) # Vector
+        self.color:(int, int, int) = color
+        self.color_to_plot:(int, int, int) = color
+        self.positions_screen:(float, float) = transpose_on_screen(self, screen) # Transpose light on screen
+        self.screen:Screen = screen
+        self.see = True
+
+class Light(Base):
     """
     Light with basic properties
     """
-    __slots__ = ("position", "color", "intensity", "ambient", "size", "positions_screen")
+    __slots__ = ("position", "intensity", "ambient", "size")
     def __init__(self, position:[float, float, float], color:[int, int, int], screen:Screen, intensity:float = 10, ambient:float = 0.1, size:int = 5):
+        super().__init__(position, [position[0] + 20, position[1], position[2]], [position[0], position[1] + 20, position[2]], color, screen)
         self.position:[int, int, int] = position
-        self.color:[int, int, int] = color
         self.intensity:float = intensity
-        self.ambient:float = ambient #ambient light [0, 1]
-        self.positions_screen:(float, float) = transpose_light_on_screen(self, screen)
-        self.size:float = 1/size
+        self.ambient:float = ambient # Ambient light [0, 1]
+        self.size:float = 1 / size
 
-class Polygon:
+class Polygon(Base):
     """
     Polygon, simpler 3D shape
     """
-    __slots__ = ("p1", "p2", "p3", "p1_p2", "p2_p3", "p1_p3", "position", "color", "color_to_plot", "normal_vector", "positions_screen", "screen", "reflection", "see", "metalic", "rough", "dispersion_light", "parameters", "texture")
+    __slots__ = ("position", "normal_vector", "reflection", "metalic", "rough", "dispersion_light", "parameters", "texture")
     def __init__(self, p1:(float, float, float), p2:(float, float, float), p3:(float, float, float), screen:Screen, color:(int, int, int) = (10, 10, 250), reflection:float = 0.2, metalic:float = 0.3, rough:float = 0.7, dispersion_light:float = 2, texture:"function" = False):
-        self.p1:(float, float, float) = p1 #Point in space
-        self.p2:(float, float, float) = p2 #Point in space
-        self.p3:(float, float, float) = p3 #Point in space
-        self.p1_p2:(float, float, float) = vector(p1, p2) #Vector
-        self.p2_p3:(float, float, float) = vector(p2, p3) #Vector
-        self.p1_p3:(float, float, float) = vector(p1, p3) #Vector
-        self.position:(float, float, float) = center_polygon(self) #Center point of the polygon
-        if color == None:
-            self.color:(int, int, int) = (int(random()*255), int(random()*255), int(random()*255))
-        else:
-            self.color:(int, int, int) = color
-        self.color_to_plot:(int, int, int) = self.color
-        self.normal_vector:(float, float, float) = find_normal_vector(self) #Vector
-        self.positions_screen:((float, float), (float, float), (float, float)) = transpose_on_screen(self, screen)
-        self.screen:Screen = screen
-        self.reflection:float = reflection #[0, 1]
-        self.see:bool = True#self.see_in_screen()
+        super().__init__(p1, p2, p3, color, screen)
+        self.position:(float, float, float) = [(p1[i] + p2[i] + p3[i]) / 3 for i in range(3)]
+        self.normal_vector = find_normal_vector(self) #Vector
+        self.reflection:float = reflection
         self.metalic:float = metalic
         self.rough:float = rough
-        self.dispersion_light:float = 1/dispersion_light
-        self.texture:"function" = texture
-        self.parameters:dict = {"color":color,
-                                "reflection":reflection,
-                                "metalic":metalic,
-                                "rough":rough,
-                                "dispersion_light":dispersion_light,
-                                "texture":texture}
+        self.dispersion_light:float = dispersion_light
+        self.parameters:dict = {"color": color,
+                                "reflection": reflection,
+                                "metalic": metalic,
+                                "rough": rough,
+                                "dispersion_light": dispersion_light,
+                                "texture": texture}
+        self.texture:"Function" = texture
 
     def add_composition(self, light:Light):
         """
@@ -77,6 +81,11 @@ class Polygon:
         """
         self.color_to_plot:(int, int, int) = light_in_polygon(self, light, self.screen)
         #print(f"Color: {self.color}\n\n")
+
+    def add_shadows(self, light:Light, polygons:"Polygon"):
+        for polygon in polygons:
+            self.color_to_plot:(int, int, int) = shadow_in_polygon(self, light, polygon)
+        
 
     def see_in_screen(self):
         """
@@ -166,7 +175,7 @@ def render(pygm, screen:Screen, polygons:list, light:list, steps:bool = True) ->
     Set up the scene given the polygons and lights
     """
     pygm.fill((0,0,0))
-    polygons = reorganize(polygons, screen)
+    polygons = reorganize([*polygons, *light], screen)
     if type(steps) == float or type(steps) == int:
         t:float = steps
         steps:bool = True
@@ -179,13 +188,13 @@ def render(pygm, screen:Screen, polygons:list, light:list, steps:bool = True) ->
                 pygame.display.flip()
                 sleep(t)
             for l in light:
-                p.add_composition(l)
+                if type(p) != Light:
+                    p.add_composition(l)
+                    p.add_shadows(l, polygons)
                 if steps:
                     sleep(t)
             pygame.draw.polygon(pygm, p.color_to_plot, p.positions_screen)
             if steps:
                 pygame.display.flip()
                 sleep(t)
-    for l in light:
-        pygame.draw.circle(pygm, l.color, l.positions_screen, radius = int(20/(max(l.position[2], 1))**(1/2) + 1))
     pygame.display.flip()

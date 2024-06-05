@@ -59,7 +59,8 @@ def transpose_on_screen(polygon:"Polygon", screen:"Screen") -> ((float, float), 
         x:float = screen.position[0] + int((p[0] - screen.position[0]) * scale)
         y:float = screen.position[1] + int((p[1] - screen.position[1]) * scale)
         return x, y
-    
+
+    #print(dir(polygon))
     p1_2d:(float, float) = project_point(polygon.p1, screen)
     p2_2d:(float, float) = project_point(polygon.p2, screen)
     p3_2d:(float, float) = project_point(polygon.p3, screen)
@@ -151,4 +152,11 @@ def light_in_polygon(polygon:"Polygon", light:"Light", screen:"Screen") -> (int,
             correct(new_color[1]),
             correct(new_color[2]))
 
+def shadow_in_polygon(polygon:"Polygon", light:"Light", polygon_:"Polygon"):
+    shadow = dot_product(vector(polygon_.position, light.position), vector(polygon.position, light.position))
+    if shadow > 800_000:
+        return [light.ambient*polygon.color[i] for i in range(3)]
+    else:
+        return polygon.color_to_plot
+    
 #Try export functions pre compiled
