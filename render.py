@@ -58,7 +58,7 @@ class Polygon(Base):
     """
     Polygon, simpler 3D shape
     """
-    __slots__ = ("position", "normal_vector", "reflection", "metalic", "rough", "dispersion_light", "parameters", "texture")
+    __slots__ = ("position", "normal_vector", "reflection", "metalic", "rough", "dispersion_light", "parameters", "texture", "in_light")
     def __init__(self, p1:(float, float, float), p2:(float, float, float), p3:(float, float, float), screen:Screen, color:(int, int, int) = (10, 10, 250), reflection:float = 0.2, metalic:float = 0.3, rough:float = 0.7, dispersion_light:float = 2, texture:"function" = False):
         super().__init__(p1, p2, p3, color, screen)
         self.position:(float, float, float) = [(p1[i] + p2[i] + p3[i]) / 3 for i in range(3)]
@@ -74,6 +74,7 @@ class Polygon(Base):
                                 "dispersion_light": dispersion_light,
                                 "texture": texture}
         self.texture:"Function" = texture
+        self.in_light:bool = False
 
     def add_composition(self, light:Light):
         """
@@ -84,7 +85,8 @@ class Polygon(Base):
 
     def add_shadows(self, light:Light, polygons:"Polygon"):
         for polygon in polygons:
-            self.color_to_plot:(int, int, int) = shadow_in_polygon(self, light, polygon)
+            if type(polygon) == Polygon and polygon.in_light:
+                self.color_to_plot:(int, int, int) = shadow_in_polygon(self, light, polygon)
         
 
     def see_in_screen(self):
@@ -190,11 +192,17 @@ def render(pygm, screen:Screen, polygons:list, light:list, steps:bool = True) ->
             for l in light:
                 if type(p) != Light:
                     p.add_composition(l)
+            for l in light:
+                if type(p) != Light:
                     p.add_shadows(l, polygons)
-                if steps:
-                    sleep(t)
+            if steps:
+                sleep(t)
             pygame.draw.polygon(pygm, p.color_to_plot, p.positions_screen)
             if steps:
                 pygame.display.flip()
                 sleep(t)
     pygame.display.flip()
+    n = 0
+    for p in polygons:
+       if type(p) != Light and p.in_light:
+           n += 1

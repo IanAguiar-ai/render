@@ -47,20 +47,20 @@ def save_frames_to_memory(min_frames=400):
                 Polygon((m, n, h_0), (m, m, h_1), (m, n, h_1), screen = screen, **stats_polygon)] #f6
 
     # Triângulo
-    a = 1000
-    b = 700
-    c = 900
-    d = 1100
-    t1 = (a, a, b)
-    t2 = (d, b, c)
-    t3 = (b, a, c)
-    t4 = (a, a, c)
-    polygons.extend([Polygon(t3, t2, t1, screen = screen, **stats_polygon),
-                     Polygon(t2, t3, t4, screen = screen, **stats_polygon),
-                     Polygon(t1, t3, t4, screen = screen, **stats_polygon),
-                     Polygon(t4, t2, t1, screen = screen, **stats_polygon)])
+##    a = 1000
+##    b = 700
+##    c = 900
+##    d = 1100
+##    t1 = (a, a, b)
+##    t2 = (d, b, c)
+##    t3 = (b, a, c)
+##    t4 = (a, a, c)
+##    polygons.extend([Polygon(t3, t2, t1, screen = screen, **stats_polygon),
+##                     Polygon(t2, t3, t4, screen = screen, **stats_polygon),
+##                     Polygon(t1, t3, t4, screen = screen, **stats_polygon),
+##                     Polygon(t4, t2, t1, screen = screen, **stats_polygon)])
  
-    polygons = multyple_fast(polygons, times = 6)
+    polygons = multyple_fast(polygons, times = 12)
 
     # Luz
     color_light = (255, 150, 150)

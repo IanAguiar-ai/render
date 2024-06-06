@@ -127,6 +127,9 @@ def light_in_polygon(polygon:"Polygon", light:"Light", screen:"Screen") -> (int,
                        light_vector[1] * polygon.normal_vector[1] + \
                        light_vector[2] * polygon.normal_vector[2] #Also the dot product
 
+    if exposition > 0.95:
+        polygon.in_light = True
+
     #Calculate reflection of light:
     reflection_vector:(float, float, float) = [light_vector[0] - 2 * exposition * polygon.normal_vector[0],
                                                light_vector[1] - 2 * exposition * polygon.normal_vector[1],
@@ -146,16 +149,19 @@ def light_in_polygon(polygon:"Polygon", light:"Light", screen:"Screen") -> (int,
 
     #Calculate color:
     correct:int = lambda x: int(max(0, min(x*255, 255)))
-    new_color:[float, float, float] = [((max(exposition, light.ambient) * intensity * polygon_normalized[i] * light_normalized[i]) + 
+    new_color:[float, float, float] = [((max(exposition * (1 + intensity), light.ambient) * polygon_normalized[i] * light_normalized[i]) + 
                                        (light_normalized[i]*reflection**(5)*polygon.reflection))/2 for i in range(3)]
     return (correct(new_color[0]),
             correct(new_color[1]),
             correct(new_color[2]))
 
 def shadow_in_polygon(polygon:"Polygon", light:"Light", polygon_:"Polygon"):
-    shadow = dot_product(vector(polygon_.position, light.position), vector(polygon.position, light.position))
-    if shadow > 800_000:
-        return [light.ambient*polygon.color[i] for i in range(3)]
+    shadow = dot_product(vector(polygon_.position, light.position),
+                         vector(polygon.position, light.position))
+    if shadow > 780_000:
+        polygon_.in_light = True
+        shadow -= 780_000
+        return [max(0, light.ambient*shadow/100_000 + polygon.color_to_plot[i]*(1 - shadow/100_000)) for i in range(3)]
     else:
         return polygon.color_to_plot
     

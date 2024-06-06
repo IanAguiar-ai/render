@@ -19,7 +19,7 @@ if __name__ == "__main__":
     h_0 = 200
     h_1 = 600
     metalic = .3
-    rough = .7
+    rough = .8
     dispersion_light = 2
     color = (10, 10, 250)
     stats_polygon = {"color":color,
@@ -57,7 +57,7 @@ if __name__ == "__main__":
                      Polygon(t1, t3, t4, screen = screen, **stats_polygon),
                      Polygon(t4, t2, t1, screen = screen, **stats_polygon)])
  
-    polygons = multyple_fast(polygons, times = 3)
+    polygons = multyple_fast(polygons, times = 4)
 
     #Light:
     color_light = (255, 150, 150)
@@ -96,7 +96,7 @@ if __name__ == "__main__":
 ##            render(pygm, screen, polygons, light, steps = False)
 ##            clock.tick(24)
 ##        print("f")
-##  
+  
         mouse_x, mouse_y = 0, 0
         z = 0
         color_r, color_g, color_b = color_light
