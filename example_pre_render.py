@@ -55,10 +55,7 @@ def save_frames_to_memory(min_frames=400):
     t2 = (d, b, c)
     t3 = (b, a, c)
     t4 = (a, a, c)
-    polygons.extend([Polygon(t3, t2, t1, screen = screen, **stats_polygon),
-                     Polygon(t2, t3, t4, screen = screen, **stats_polygon),
-                     Polygon(t1, t3, t4, screen = screen, **stats_polygon),
-                     Polygon(t4, t2, t1, screen = screen, **stats_polygon)])
+    polygons.extend([Polygon(t3, t2, t1, screen = screen, **stats_polygon)])
  
     polygons = multyple_fast(polygons, times = 6)
 
@@ -140,7 +137,7 @@ def display_frames_from_memory(frames, min_frames=24):
 
 def save_video(frames):
     import imageio
-    imageio.mimsave('rendered_video.mp4', [pygame.surfarray.array3d(frame) for frame in frames])
+    imageio.mimsave('rendered_video.mp4', [pygame.surfarray.array3d(frame) for frame in frames], fps=24)
 
 if __name__ == "__main__":
     frames = save_frames_to_memory()  # Pré-renderizar e salvar os quadros na memória
