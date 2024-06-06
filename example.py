@@ -52,10 +52,7 @@ if __name__ == "__main__":
     t2 = (d, b, c)
     t3 = (b, a, c)
     t4 = (a, a, c)
-    polygons.extend([Polygon(t3, t2, t1, screen = screen, **stats_polygon),
-                     Polygon(t2, t3, t4, screen = screen, **stats_polygon),
-                     Polygon(t1, t3, t4, screen = screen, **stats_polygon),
-                     Polygon(t4, t2, t1, screen = screen, **stats_polygon)])
+    polygons.extend([Polygon(t3, t2, t1, screen = screen, **stats_polygon)])
  
     polygons = multyple_fast(polygons, times = 4)
 

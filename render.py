@@ -85,7 +85,7 @@ class Polygon(Base):
 
     def add_shadows(self, light:Light, polygons:"Polygon"):
         for polygon in polygons:
-            if type(polygon) == Polygon and polygon.in_light:
+            if type(polygon) == Polygon and polygon.in_light and self.in_light:
                 self.color_to_plot:(int, int, int) = shadow_in_polygon(self, light, polygon)
         
 
@@ -172,7 +172,7 @@ def reorganize(polygons:list, screen:Screen) -> list:
     polygons.sort(key = lambda poly: poly.position[2], reverse = True)
     return polygons
 
-def render(pygm, screen:Screen, polygons:list, light:list, steps:bool = True) -> None:
+def render(pygm, screen:Screen, polygons:list, light:list, steps:bool = True, shadows:bool = True) -> None:
     """
     Set up the scene given the polygons and lights
     """
@@ -192,9 +192,10 @@ def render(pygm, screen:Screen, polygons:list, light:list, steps:bool = True) ->
             for l in light:
                 if type(p) != Light:
                     p.add_composition(l)
-            for l in light:
-                if type(p) != Light:
-                    p.add_shadows(l, polygons)
+            if shadows:
+                for l in light:
+                    if type(p) != Light:
+                        p.add_shadows(l, polygons)
             if steps:
                 sleep(t)
             pygame.draw.polygon(pygm, p.color_to_plot, p.positions_screen)

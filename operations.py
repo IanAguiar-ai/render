@@ -159,7 +159,6 @@ def shadow_in_polygon(polygon:"Polygon", light:"Light", polygon_:"Polygon"):
     shadow = dot_product(vector(polygon_.position, light.position),
                          vector(polygon.position, light.position))
     if shadow > 780_000:
-        polygon_.in_light = True
         shadow -= 780_000
         return [max(0, light.ambient*shadow/100_000 + polygon.color_to_plot[i]*(1 - shadow/100_000)) for i in range(3)]
     else:
