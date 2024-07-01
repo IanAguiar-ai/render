@@ -163,5 +163,46 @@ def shadow_in_polygon(polygon:"Polygon", light:"Light", polygon_:"Polygon"):
         return [max(0, light.ambient*shadow/100_000 + polygon.color_to_plot[i]*(1 - shadow/100_000)) for i in range(3)]
     else:
         return polygon.color_to_plot
-    
+
+
+# =====================================================================================================================
+"""
+If have a cython pre-compiled functions
+"""
+
 #Try export functions pre compiled
+try_cython = True
+
+if try_cython: 
+    cython_ = 0
+    try:
+        from operations_cython import vector, vector_center_polygon, \
+             vector_vectorial_product, vectorial_product_vector, \
+             project_point, normalized, distance_two_points_vector
+        print("OTIMIZED FUNCTIONS CYTHON")
+        cython_ = 1
+    except:
+        pass
+
+    if cython_:
+        def center_polygon(polygon:"Polygon") -> (float, float, float):
+            """
+            Find the center point of a polygon
+            """      
+            return vector_center_polygon(polygon.p1, polygon.p2, polygon.p3)
+
+        def vectorial_product(a:"Polygon") -> (float, float, float):
+            """
+            Find vectorial product
+            """
+            return vector_vectorial_product(a.p1_p2, a.p2_p3, a.p1_p3)
+
+        def transpose_on_screen(polygon:"Polygon", screen:"Screen") -> ((float, float), (float, float), (float, float)):
+            """
+            Transpose polygon on 2d screen (x, y) considering perspective projection
+            """
+            #print(dir(polygon))
+            p1_2d:(float, float) = project_point(polygon.p1, screen.position)
+            p2_2d:(float, float) = project_point(polygon.p2, screen.position)
+            p3_2d:(float, float) = project_point(polygon.p3, screen.position)
+            return p1_2d, p2_2d, p3_2d

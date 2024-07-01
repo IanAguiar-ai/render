@@ -7,6 +7,8 @@ if __name__ == "__main__":
     width, height = 1080, 720
     screen = Screen((0, 0, 1000), width, height)
 
+    t_fps = 1
+
     roug = lambda x: max(0, sin(x*100)/1.5)
     strange = lambda x: x**3
 
@@ -43,6 +45,7 @@ if __name__ == "__main__":
                 Polygon((m, m, h_0), (m, m, h_1), (m, n, h_0), screen = screen, **stats_polygon), #f6
                 Polygon((m, n, h_0), (m, m, h_1), (m, n, h_1), screen = screen, **stats_polygon)] #f6
 
+    stats_polygon["color"] = [120, 200, 80]
     #Triangle:
     a = 1000
     b = 700
@@ -53,8 +56,12 @@ if __name__ == "__main__":
     t3 = (b, a, c)
     t4 = (a, a, c)
     polygons.extend([Polygon(t3, t2, t1, screen = screen, **stats_polygon)])
+
+    #stats_polygon["color"] = [255, 255, 255]
+    #polygons.extend([Polygon((1200, 100, 1000), (100, 1200, 1000), (100, 100, 1000), screen = screen, **stats_polygon),
+    #                 Polygon((1200, 1200, 1000), (100, 1200, 1000), (1200, 100, 1000), screen = screen, **stats_polygon)])
  
-    polygons = multyple_fast(polygons, times = 4)
+    polygons = multyple_fast(polygons, times = 6)
 
     #Light:
     color_light = (255, 150, 150)
@@ -127,11 +134,18 @@ if __name__ == "__main__":
             if n_t % 70 == 0:
                 n_t = 1
                 print(f"Z:{z}\nR:{color_r}\nG:{color_g}\nB:{color_b}")
+                print(f"Mean fps: {fps}")
             n_t += 1
 
             position_light = [mouse_x, mouse_y, z]
             light = [Light(position_light, color = (color_r, color_g, color_b), screen=screen, intensity=int_, ambient=amb, size=size)]
-            render(pygm, screen, polygons, light, steps=False)
+            render(pygm, screen, polygons, light, steps = False, shadows = True)
             clock.tick(24)
+
+            if t_fps == 1:
+                fps = clock.get_fps()
+            else:
+                fps = (clock.get_fps() + (fps*t_fps)) / (t_fps + 1)
+            t_fps += 1
             
     pygame.quit()   
