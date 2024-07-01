@@ -48,11 +48,7 @@ def find_normal_vector(polygon:"Polygon") -> (float, float, float):
     normalized:float =  (vectorial[0]**2 + vectorial[1]**2 + vectorial[2]**2)**(1/2)        
     return (vectorial[0]/normalized, vectorial[1]/normalized, vectorial[2]/normalized)
 
-def transpose_on_screen(polygon:"Polygon", screen:"Screen") -> ((float, float), (float, float), (float, float)):
-    """
-    Transpose polygon on 2d screen (x, y) considering perspective projection
-    """
-    def project_point(p:(float, float, float), screen:"Screen") -> (float, float):
+def project_point(p:(float, float, float), screen:"Screen") -> (float, float):
         z_factor:float = screen.position[2]
         scale:float = z_factor / (z_factor + p[2])
         
@@ -60,6 +56,10 @@ def transpose_on_screen(polygon:"Polygon", screen:"Screen") -> ((float, float), 
         y:float = screen.position[1] + int((p[1] - screen.position[1]) * scale)
         return x, y
 
+def transpose_on_screen(polygon:"Polygon", screen:"Screen") -> ((float, float), (float, float), (float, float)):
+    """
+    Transpose polygon on 2d screen (x, y) considering perspective projection
+    """
     #print(dir(polygon))
     p1_2d:(float, float) = project_point(polygon.p1, screen)
     p2_2d:(float, float) = project_point(polygon.p2, screen)
@@ -70,14 +70,6 @@ def transpose_light_on_screen(light:"Light", screen:"Screen") -> ((float, float)
     """
     Transpose polygon on 2d screen (x, y) considering perspective projection
     """
-    def project_point(p:(float, float, float), screen:"Screen") -> (float, float):
-        z_factor:float = screen.position[2]
-        scale:float = z_factor / (z_factor + p[2])
-        
-        x:float = screen.position[0] + int((p[0] - screen.position[0]) * scale)
-        y:float = screen.position[1] + int((p[1] - screen.position[1]) * scale)
-        return x, y
-
     return project_point(light.position, screen)
 
 def normalized(vector:(float, float, float)) -> (float, float, float):
@@ -91,17 +83,17 @@ def distance_two_points(obj_1:"obj", obj_2:"obj") -> float:
     """
     Distance two objects
     """
-    return ((obj_1.position[0] - obj_2.position[0])**2 + \
-            (obj_1.position[1] - obj_2.position[1])**2 + \
-            (obj_1.position[2] - obj_2.position[2])**2)**(1/2)
+    return ((obj_1.position[0] - obj_2.position[0])*(obj_1.position[0] - obj_2.position[0]) + \
+            (obj_1.position[1] - obj_2.position[1])*(obj_1.position[1] - obj_2.position[1]) + \
+            (obj_1.position[2] - obj_2.position[2])*(obj_1.position[2] - obj_2.position[2]))**(1/2)
 
 def distance_two_points_vector(obj_1:(float, float, float), obj_2:(float, float, float)) -> float:
     """
     Distance two points
     """
-    return ((obj_1[0] - obj_2[0])**2 + \
-            (obj_1[1] - obj_2[1])**2 + \
-            (obj_1[2] - obj_2[2])**2)**(1/2)
+    return ((obj_1[0] - obj_2[0])*(obj_1[0] - obj_2[0]) + \
+            (obj_1[1] - obj_2[1])*(obj_1[1] - obj_2[1]) + \
+            (obj_1[2] - obj_2[2])*(obj_1[2] - obj_2[2]))**(1/2)
 
 def light_in_polygon(polygon:"Polygon", light:"Light", screen:"Screen") -> (int, int, int):
     """
@@ -177,7 +169,7 @@ if try_cython:
     cython_ = 0
     try:
         from operations_cython import vector, vector_center_polygon, \
-             vector_vectorial_product, vectorial_product_vector, \
+             vector_vectorial_product, dot_product, vectorial_product_vector, \
              project_point, normalized, distance_two_points_vector
         print("OTIMIZED FUNCTIONS CYTHON")
         cython_ = 1
@@ -206,3 +198,15 @@ if try_cython:
             p2_2d:(float, float) = project_point(polygon.p2, screen.position)
             p3_2d:(float, float) = project_point(polygon.p3, screen.position)
             return p1_2d, p2_2d, p3_2d
+
+        def transpose_light_on_screen(light:"Light", screen:"Screen") -> ((float, float), (float, float), (float, float)):
+            """
+            Transpose polygon on 2d screen (x, y) considering perspective projection
+            """
+            return project_point(light.position, screen.position)
+
+        def distance_two_points(obj_1:"obj", obj_2:"obj") -> float:
+            """
+            Distance two objects
+            """
+            return distance_two_points_vector(obj_1.position, obj_2.position)

@@ -61,7 +61,7 @@ if __name__ == "__main__":
     #polygons.extend([Polygon((1200, 100, 1000), (100, 1200, 1000), (100, 100, 1000), screen = screen, **stats_polygon),
     #                 Polygon((1200, 1200, 1000), (100, 1200, 1000), (1200, 100, 1000), screen = screen, **stats_polygon)])
  
-    polygons = multyple_fast(polygons, times = 6)
+    polygons = multyple_fast(polygons, times = 5)
 
     #Light:
     color_light = (255, 150, 150)
