@@ -133,16 +133,20 @@ def light_in_polygon(polygon:"Polygon", light:"Light", screen:"Screen") -> (int,
     
     if polygon.texture != False:
         reflection = polygon.texture(reflection)
-    reflection = reflection**polygon.dispersion_light * polygon.rough + exposition * polygon.metalic  
-
+    #reflection = reflection**polygon.dispersion_light * polygon.rough + exposition * polygon.metalic  
+    #reflection = (reflection**polygon.dispersion_light + polygon.rough + polygon.metalic) * exposition
+    
     #print(f"lv: {light_vector} <- {polygon.normal_vector}")
     #print(f"Exposition: {exposition}")
     #print(f"Reflection: {reflection}")
 
     #Calculate color:
     correct:int = lambda x: int(max(0, min(x*255, 255)))
-    new_color:[float, float, float] = [((max(exposition * (1 + intensity), light.ambient) * polygon_normalized[i] * light_normalized[i]) + 
-                                       (light_normalized[i]*reflection**(5)*polygon.reflection))/2 for i in range(3)]
+##    new_color:[float, float, float] = [((max(exposition * (1 + intensity), light.ambient) * polygon_normalized[i] * light_normalized[i]) + 
+##                                       (light_normalized[i]*reflection**5*polygon.reflection))/2 for i in range(3)]
+    #polygon_normalized luz direta
+    #light_normalized refletida da cor do objeto
+    new_color:[float, float, float] = [(intensity * (exposition * (polygon_normalized[i] * polygon.rough) + (polygon.reflection + polygon.dispersion_light) * (light_normalized[i] * polygon.metalic))/distance**(1/2) + light.ambient) for i in range(3)]
     return (correct(new_color[0]),
             correct(new_color[1]),
             correct(new_color[2]))

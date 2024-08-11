@@ -13,17 +13,17 @@ def save_frames_to_memory(min_frames=400):
     roug = lambda x: max(0, sin(x*100)/1.5)
     strange = lambda x: x**3
 
-    # Parâmetros dos polígonos
-    ref = 1
-    amb = 0.05
-    int_ = 1000
+    #Polygons:
+    ref = 0.6
+    amb = .01
+    int_ = 10
     n = 200
     m = 600
-    h_0 = 200
+    h_0 = 100
     h_1 = 600
-    metalic = .3
-    rough = .75
-    dispersion_light = 2
+    metalic = 3#0.3
+    rough = 10#0.5
+    dispersion_light = 0.5
     color = (10, 10, 250)
     stats_polygon = {"color":color,
                      "reflection":ref,
@@ -55,9 +55,9 @@ def save_frames_to_memory(min_frames=400):
     t2 = (d, b, c)
     t3 = (b, a, c)
     t4 = (a, a, c)
-    polygons.extend([Polygon(t3, t2, t1, screen = screen, **stats_polygon)])
+    #polygons.extend([Polygon(t3, t2, t1, screen = screen, **stats_polygon)])
  
-    polygons = multyple_fast(polygons, times = 6)
+    polygons = multyple_fast(polygons, times = 12)
 
     # Luz
     color_light = (255, 150, 150)

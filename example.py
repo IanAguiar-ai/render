@@ -13,16 +13,16 @@ if __name__ == "__main__":
     strange = lambda x: x**3
 
     #Polygons:
-    ref = 1
-    amb = 0.1
-    int_ = 1000
+    ref = 0.6
+    amb = .01
+    int_ = 10
     n = 200
     m = 600
-    h_0 = 200
+    h_0 = 100
     h_1 = 600
-    metalic = .3
-    rough = .8
-    dispersion_light = 2
+    metalic = 3#0.3
+    rough = 10#0.5
+    dispersion_light = 0.5
     color = (10, 10, 250)
     stats_polygon = {"color":color,
                      "reflection":ref,
@@ -55,13 +55,13 @@ if __name__ == "__main__":
     t2 = (d, b, c)
     t3 = (b, a, c)
     t4 = (a, a, c)
-    polygons.extend([Polygon(t3, t2, t1, screen = screen, **stats_polygon)])
+    #polygons.extend([Polygon(t3, t2, t1, screen = screen, **stats_polygon)])
 
     #stats_polygon["color"] = [255, 255, 255]
     #polygons.extend([Polygon((1200, 100, 1000), (100, 1200, 1000), (100, 100, 1000), screen = screen, **stats_polygon),
     #                 Polygon((1200, 1200, 1000), (100, 1200, 1000), (1200, 100, 1000), screen = screen, **stats_polygon)])
  
-    polygons = multyple_fast(polygons, times = 5)
+    polygons = multyple_fast(polygons, times = 7)
 
     #Light:
     color_light = (255, 150, 150)
@@ -73,7 +73,7 @@ if __name__ == "__main__":
     pygm = pygame.display.set_mode((screen.width, screen.height))
     pygame.display.set_caption("RENDER")
     clock = pygame.time.Clock()
-    render(pygm, screen, polygons, light, steps = True)
+    render(pygm, screen, polygons, light, steps = False)
     while True:
 ##        for i in range(10, 500, 5):
 ##            light = [Light([50, i, 1000], color = color_light, screen = screen, intensity = int_, ambient = amb, size = size)]
@@ -139,7 +139,7 @@ if __name__ == "__main__":
 
             position_light = [mouse_x, mouse_y, z]
             light = [Light(position_light, color = (color_r, color_g, color_b), screen=screen, intensity=int_, ambient=amb, size=size)]
-            render(pygm, screen, polygons, light, steps = False, shadows = True)
+            render(pygm, screen, polygons, light, steps = False, shadows = False)
             clock.tick(24)
 
             if t_fps == 1:

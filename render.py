@@ -172,7 +172,7 @@ def reorganize(polygons:list, screen:Screen) -> list:
     polygons.sort(key = lambda poly: poly.position[2], reverse = True)
     return polygons
 
-def render(pygm, screen:Screen, polygons:list, light:list, steps:bool = True, shadows:bool = True) -> None:
+def render(pygm, screen:Screen, polygons:list, light:list, steps:bool = True, shadows:bool = False) -> None:
     """
     Set up the scene given the polygons and lights
     """
