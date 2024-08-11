@@ -1,7 +1,7 @@
 # render
 Render from scratch.
 
-[Click here for example.](./renders/rendered_video.mp4)
+[Click here for example.](./renders)
 
 ## Files
 
